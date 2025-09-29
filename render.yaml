@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: dentist-video-platform
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run setup
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USER
+        value: dentist.platform.app@gmail.com
+      - key: EMAIL_PASS
+        value: your-gmail-app-password
+      - key: EMAIL_FROM
+        value: "Dentist Platform <noreply@dentistplatform.com>"
+      - key: ADMIN_EMAIL
+        value: admin@dentistplatform.com
+      - key: ADMIN_PASSWORD
+        value: admin123!@#
+      - key: MAX_FILE_SIZE
+        value: "104857600"
+      - key: BCRYPT_ROUNDS
+        value: "12"
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+      - key: VIDEO_QUALITY
+        value: medium
+      - key: THUMBNAIL_SIZE
+        value: "320x240"
+      - key: ENABLE_TRANSCODING
+        value: "true"
+    disk:
+      name: dentist-platform-disk
+      mountPath: /opt/render/project/uploads
+      sizeGB: 1

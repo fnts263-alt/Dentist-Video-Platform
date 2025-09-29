@@ -1,0 +1,102 @@
+{
+  "name": "dentist-video-platform",
+  "description": "Professional Dentist Video Platform with secure streaming and role-based access",
+  "repository": "https://github.com/your-username/dentist-video-platform",
+  "logo": "https://cdn-icons-png.flaticon.com/512/2966/2966334.png",
+  "keywords": ["dentist", "video", "platform", "streaming", "education"],
+  "image": "heroku/nodejs",
+  "stack": "heroku-22",
+  "buildpacks": [
+    {
+      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git"
+    },
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Node.js environment",
+      "value": "production"
+    },
+    "JWT_SECRET": {
+      "description": "JWT secret key for authentication",
+      "generator": "secret"
+    },
+    "SESSION_SECRET": {
+      "description": "Session secret key",
+      "generator": "secret"
+    },
+    "EMAIL_HOST": {
+      "description": "SMTP host for email service",
+      "value": "smtp.gmail.com"
+    },
+    "EMAIL_PORT": {
+      "description": "SMTP port",
+      "value": "587"
+    },
+    "EMAIL_USER": {
+      "description": "Email username",
+      "value": "dentist.platform.app@gmail.com"
+    },
+    "EMAIL_PASS": {
+      "description": "Email password/app password",
+      "value": "your-gmail-app-password"
+    },
+    "EMAIL_FROM": {
+      "description": "From email address",
+      "value": "Dentist Platform <noreply@dentistplatform.com>"
+    },
+    "ADMIN_EMAIL": {
+      "description": "Admin email address",
+      "value": "admin@dentistplatform.com"
+    },
+    "ADMIN_PASSWORD": {
+      "description": "Admin password",
+      "value": "admin123!@#"
+    },
+    "MAX_FILE_SIZE": {
+      "description": "Maximum file upload size",
+      "value": "104857600"
+    },
+    "BCRYPT_ROUNDS": {
+      "description": "Bcrypt rounds for password hashing",
+      "value": "12"
+    },
+    "RATE_LIMIT_WINDOW_MS": {
+      "description": "Rate limit window in milliseconds",
+      "value": "900000"
+    },
+    "RATE_LIMIT_MAX_REQUESTS": {
+      "description": "Maximum requests per window",
+      "value": "100"
+    },
+    "VIDEO_QUALITY": {
+      "description": "Video transcoding quality",
+      "value": "medium"
+    },
+    "THUMBNAIL_SIZE": {
+      "description": "Thumbnail dimensions",
+      "value": "320x240"
+    },
+    "ENABLE_TRANSCODING": {
+      "description": "Enable video transcoding",
+      "value": "true"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:mini",
+      "as": "DATABASE"
+    }
+  ],
+  "scripts": {
+    "postdeploy": "npm run setup"
+  }
+}

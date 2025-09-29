@@ -1,0 +1,60 @@
+{
+  "version": 2,
+  "name": "dentist-video-platform",
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/server.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "PORT": "3000",
+    "HOST": "0.0.0.0",
+    "DB_PATH": "./database/dentist_platform.db",
+    "JWT_SECRET": "super_secret_jwt_key_for_dentist_platform_2024_production",
+    "JWT_EXPIRES_IN": "24h",
+    "EMAIL_HOST": "smtp.gmail.com",
+    "EMAIL_PORT": "587",
+    "EMAIL_SECURE": "false",
+    "EMAIL_USER": "dentist.platform.app@gmail.com",
+    "EMAIL_PASS": "your-gmail-app-password",
+    "EMAIL_FROM": "Dentist Platform <noreply@dentistplatform.com>",
+    "MAX_FILE_SIZE": "104857600",
+    "UPLOAD_PATH": "./uploads",
+    "ALLOWED_VIDEO_TYPES": "mp4,avi,mov,wmv,flv,mkv",
+    "BCRYPT_ROUNDS": "12",
+    "SESSION_SECRET": "super_session_secret_for_dentist_platform_2024_production",
+    "RATE_LIMIT_WINDOW_MS": "900000",
+    "RATE_LIMIT_MAX_REQUESTS": "100",
+    "ADMIN_EMAIL": "admin@dentistplatform.com",
+    "ADMIN_PASSWORD": "admin123!@#",
+    "VIDEO_QUALITY": "medium",
+    "THUMBNAIL_SIZE": "320x240",
+    "ENABLE_TRANSCODING": "true"
+  },
+  "functions": {
+    "server.js": {
+      "maxDuration": 30
+    }
+  },
+  "regions": ["iad1"],
+  "public": true
+}

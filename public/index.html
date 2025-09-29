@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dentist Video Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        }
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <!-- Navigation -->
+    <nav class="bg-white dark:bg-gray-800 shadow-lg border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <i class="fas fa-tooth text-2xl text-primary-600 dark:text-primary-400 mr-3"></i>
+                    <h1 class="text-xl font-bold text-gray-900 dark:text-white">Dentist Video Platform</h1>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </a>
+                    <a href="#videos" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                        <i class="fas fa-video mr-2"></i>Videos
+                    </a>
+                    <div id="admin-nav" class="hidden">
+                        <a href="#admin" class="nav-link text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-cog mr-2"></i>Admin
+                        </a>
+                    </div>
+                </div>
+
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    <!-- Dark Mode Toggle -->
+                    <button id="darkModeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+
+                    <!-- Auth Buttons -->
+                    <div id="auth-buttons" class="hidden">
+                        <button id="loginBtn" class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </button>
+                        <button id="registerBtn" class="ml-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="fas fa-user-plus mr-2"></i>Register
+                        </button>
+                    </div>
+
+                    <!-- User Menu -->
+                    <div id="user-menu" class="hidden relative">
+                        <button id="userMenuBtn" class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <div class="h-8 w-8 rounded-full bg-primary-600 flex items-center justify-center text-white font-medium">
+                                <span id="userInitials">U</span>
+                            </div>
+                            <span id="userName" class="ml-2 text-gray-700 dark:text-gray-300">User</span>
+                            <i class="fas fa-chevron-down ml-1 text-gray-500"></i>
+                        </button>
+                        <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700">
+                            <a href="#profile" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-user mr-2"></i>Profile
+                            </a>
+                            <a href="#settings" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-cog mr-2"></i>Settings
+                            </a>
+                            <hr class="my-1 border-gray-200 dark:border-gray-700">
+                            <button id="logoutBtn" class="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1">
+        <!-- Home Page -->
+        <div id="home-page" class="page">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <!-- Hero Section -->
+                <div class="text-center mb-16">
+                    <h1 class="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+                        Professional Dental
+                        <span class="text-primary-600 dark:text-primary-400">Education</span>
+                    </h1>
+                    <p class="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+                        Access comprehensive dental procedure videos, learn from experts, and stay updated with the latest techniques in dentistry.
+                    </p>
+                    <div id="home-auth-buttons" class="hidden">
+                        <button id="homeLoginBtn" class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors mr-4">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </button>
+                        <button id="homeRegisterBtn" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors">
+                            <i class="fas fa-user-plus mr-2"></i>Register
+                        </button>
+                    </div>
+                    <div id="home-user-welcome" class="hidden">
+                        <h2 class="text-2xl text-gray-700 dark:text-gray-300 mb-4">
+                            Welcome back, <span id="homeUserName" class="text-primary-600 dark:text-primary-400 font-semibold"></span>!
+                        </h2>
+                        <button id="homeVideosBtn" class="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors">
+                            <i class="fas fa-video mr-2"></i>Browse Videos
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="grid md:grid-cols-3 gap-8 mb-16">
+                    <div class="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+                        <i class="fas fa-video text-4xl text-primary-600 dark:text-primary-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">High-Quality Videos</h3>
+                        <p class="text-gray-600 dark:text-gray-300">Professional dental procedure videos with detailed explanations and techniques.</p>
+                    </div>
+                    <div class="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+                        <i class="fas fa-users text-4xl text-primary-600 dark:text-primary-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Expert Content</h3>
+                        <p class="text-gray-600 dark:text-gray-300">Learn from experienced dental professionals and stay updated with best practices.</p>
+                    </div>
+                    <div class="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+                        <i class="fas fa-mobile-alt text-4xl text-primary-600 dark:text-primary-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Mobile Friendly</h3>
+                        <p class="text-gray-600 dark:text-gray-300">Access content on any device, anywhere, anytime with our responsive platform.</p>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="grid md:grid-cols-4 gap-6 mb-16">
+                    <div class="text-center p-6 bg-primary-600 text-white rounded-lg">
+                        <i class="fas fa-video text-3xl mb-2"></i>
+                        <div id="totalVideos" class="text-3xl font-bold">0</div>
+                        <div class="text-primary-100">Videos</div>
+                    </div>
+                    <div class="text-center p-6 bg-green-600 text-white rounded-lg">
+                        <i class="fas fa-users text-3xl mb-2"></i>
+                        <div id="totalUsers" class="text-3xl font-bold">0</div>
+                        <div class="text-green-100">Users</div>
+                    </div>
+                    <div class="text-center p-6 bg-purple-600 text-white rounded-lg">
+                        <i class="fas fa-eye text-3xl mb-2"></i>
+                        <div id="totalViews" class="text-3xl font-bold">0</div>
+                        <div class="text-purple-100">Views</div>
+                    </div>
+                    <div class="text-center p-6 bg-orange-600 text-white rounded-lg">
+                        <i class="fas fa-graduation-cap text-3xl mb-2"></i>
+                        <div id="totalCategories" class="text-3xl font-bold">0</div>
+                        <div class="text-orange-100">Categories</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Videos Page -->
+        <div id="videos-page" class="page hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                        <i class="fas fa-video mr-3 text-primary-600 dark:text-primary-400"></i>
+                        Video Library
+                    </h1>
+                    
+                    <!-- Search and Filters -->
+                    <div class="flex flex-col md:flex-row gap-4 mb-6">
+                        <div class="flex-1">
+                            <div class="relative">
+                                <input type="text" id="videoSearch" placeholder="Search videos..." 
+                                       class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+                        <select id="categoryFilter" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <option value="">All Categories</option>
+                        </select>
+                        <select id="sortBy" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <option value="created_at">Latest</option>
+                            <option value="title">Title</option>
+                            <option value="duration">Duration</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Videos Grid -->
+                <div id="videosGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                    <!-- Videos will be loaded here -->
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination" class="flex justify-center">
+                    <!-- Pagination will be loaded here -->
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="videosLoading" class="hidden text-center py-12">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p class="text-gray-600 dark:text-gray-300">Loading videos...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Player Page -->
+        <div id="video-player-page" class="page hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <button id="backToVideos" class="mb-6 text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Videos
+                </button>
+                
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <!-- Video Player -->
+                    <div class="lg:col-span-2">
+                        <div id="videoContainer" class="video-container bg-black rounded-lg overflow-hidden shadow-lg">
+                            <!-- Video player will be loaded here -->
+                        </div>
+                        
+                        <!-- Video Info -->
+                        <div class="mt-6">
+                            <h1 id="videoTitle" class="text-2xl font-bold text-gray-900 dark:text-white mb-2"></h1>
+                            <div class="flex items-center text-sm text-gray-600 dark:text-gray-300 mb-4">
+                                <span id="videoDuration" class="mr-4">
+                                    <i class="fas fa-clock mr-1"></i>
+                                </span>
+                                <span id="videoViews" class="mr-4">
+                                    <i class="fas fa-eye mr-1"></i>
+                                </span>
+                                <span id="videoUploadDate">
+                                    <i class="fas fa-calendar mr-1"></i>
+                                </span>
+                            </div>
+                            <p id="videoDescription" class="text-gray-700 dark:text-gray-300 mb-4"></p>
+                            <div id="videoTags" class="flex flex-wrap gap-2 mb-4">
+                                <!-- Tags will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                <i class="fas fa-info-circle mr-2 text-primary-600 dark:text-primary-400"></i>
+                                Video Details
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Category:</span>
+                                    <span id="videoCategory" class="ml-2 text-gray-900 dark:text-white"></span>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Uploaded by:</span>
+                                    <span id="videoUploadedBy" class="ml-2 text-gray-900 dark:text-white"></span>
+                                </div>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">File size:</span>
+                                    <span id="videoFileSize" class="ml-2 text-gray-900 dark:text-white"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Related Videos -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                <i class="fas fa-list mr-2 text-primary-600 dark:text-primary-400"></i>
+                                Related Videos
+                            </h3>
+                            <div id="relatedVideos" class="space-y-3">
+                                <!-- Related videos will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Page -->
+        <div id="admin-page" class="page hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+                    <i class="fas fa-cog mr-3 text-primary-600 dark:text-primary-400"></i>
+                    Admin Dashboard
+                </h1>
+
+                <!-- Admin Navigation -->
+                <div class="mb-8">
+                    <nav class="flex space-x-8">
+                        <button class="admin-nav-btn active" data-section="dashboard">
+                            <i class="fas fa-chart-bar mr-2"></i>Dashboard
+                        </button>
+                        <button class="admin-nav-btn" data-section="users">
+                            <i class="fas fa-users mr-2"></i>Users
+                        </button>
+                        <button class="admin-nav-btn" data-section="videos">
+                            <i class="fas fa-video mr-2"></i>Videos
+                        </button>
+                        <button class="admin-nav-btn" data-section="activity">
+                            <i class="fas fa-history mr-2"></i>Activity Logs
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Admin Content -->
+                <div id="admin-content">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Modal -->
+        <div id="loginModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+                <div class="mt-3">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Login</h3>
+                        <button id="closeLoginModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="loginForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                            <input type="email" id="loginEmail" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
+                            <input type="password" id="loginPassword" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <button type="button" id="forgotPasswordBtn" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                                Forgot password?
+                            </button>
+                        </div>
+                        <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-md transition-colors">
+                            Login
+                        </button>
+                        <div class="text-center">
+                            <button type="button" id="switchToRegister" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                                Don't have an account? Register
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Modal -->
+        <div id="registerModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+                <div class="mt-3">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Register</h3>
+                        <button id="closeRegisterModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="registerForm" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name</label>
+                                <input type="text" id="registerFirstName" required
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name</label>
+                                <input type="text" id="registerLastName" required
+                                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+                            <input type="email" id="registerEmail" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role</label>
+                            <select id="registerRole" required
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                                <option value="">Select Role</option>
+                                <option value="senior_dentist">Senior Dentist</option>
+                                <option value="junior_dentist">Junior Dentist</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
+                            <input type="password" id="registerPassword" required minlength="8"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        </div>
+                        <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-md transition-colors">
+                            Register
+                        </button>
+                        <div class="text-center">
+                            <button type="button" id="switchToLogin" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                                Already have an account? Login
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Upload Modal (Admin Only) -->
+        <div id="uploadModal" class="modal hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+                <div class="mt-3">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Upload Video</h3>
+                        <button id="closeUploadModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="uploadForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video File</label>
+                            <input type="file" id="videoFile" accept="video/*" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Maximum file size: 100MB</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
+                            <input type="text" id="videoTitleInput" required
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+                            <textarea id="videoDescriptionInput" rows="3"
+                                      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category</label>
+                            <input type="text" id="videoCategoryInput" placeholder="e.g., General Dentistry"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
+                            <input type="text" id="videoTagsInput" placeholder="Comma-separated tags"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                        </div>
+                        <button type="submit" class="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-md transition-colors">
+                            <i class="fas fa-upload mr-2"></i>Upload Video
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="notification" class="fixed top-4 right-4 z-50 hidden">
+            <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 max-w-sm">
+                <div class="flex items-start">
+                    <div id="notificationIcon" class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h4 id="notificationTitle" class="text-sm font-medium text-gray-900 dark:text-white"></h4>
+                        <p id="notificationMessage" class="text-sm text-gray-500 dark:text-gray-400"></p>
+                    </div>
+                    <button id="closeNotification" class="ml-auto flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
