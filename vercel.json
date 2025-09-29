@@ -49,12 +49,8 @@
     "VIDEO_QUALITY": "medium",
     "THUMBNAIL_SIZE": "320x240",
     "ENABLE_TRANSCODING": "true"
-  },
-  "functions": {
-    "server.js": {
-      "maxDuration": 30
-    }
-  },
-  "regions": ["iad1"],
+  }, 
+ "regions": ["iad1"],
   "public": true
+
 }
